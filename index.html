@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Doga & Tan 💕</title>
+<meta name="description" content="A couples app where the universe has already decided: Tan loves more.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2226%22 font-size=%2228%22>💗</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,700;1,700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rose:#ff4d79;
+    --rose-deep:#c9184a;
+    --pink:#ff8fab;
+    --purple:#8a2be2;
+    --gold:#ffd166;
+    --bg1:#2b0b1f;
+    --bg2:#4a0e2e;
+    --bg3:#1a0b2e;
+    --card:rgba(255,255,255,0.08);
+    --card-border:rgba(255,255,255,0.18);
+    --text:#fff0f3;
+    --muted:#e3b9c6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,77,121,0.25), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(138,43,226,0.25), transparent 40%),
+      linear-gradient(160deg, var(--bg3), var(--bg1) 55%, var(--bg2));
+    background-attachment:fixed;
+    font-family:'Poppins', sans-serif;
+    color:var(--text);
+    overflow-x:hidden;
+    position:relative;
+  }
+  h1,h2,h3{font-family:'Playfair Display', serif; margin:0;}
+  .script{font-family:'Dancing Script', cursive;}
+
+  /* ---------- Floating hearts background ---------- */
+  #heartsBg{
+    position:fixed; inset:0; width:100%; height:100%;
+    overflow:hidden; z-index:0; pointer-events:none;
+  }
+  .f-heart{
+    position:absolute; bottom:-10%;
+    opacity:0.85;
+    animation-name:floatUp;
+    animation-timing-function:ease-in;
+    animation-iteration-count:infinite;
+  }
+  .f-heart .shape{
+    position:relative; width:100%; height:100%;
+    transform:rotate(-45deg);
+    animation:spin 6s linear infinite;
+  }
+  .f-heart .shape::before,
+  .f-heart .shape::after{
+    content:""; position:absolute; width:100%; height:100%; border-radius:50%;
+    background:inherit;
+  }
+  .f-heart .shape::before{ top:-50%; left:0; }
+  .f-heart .shape::after{ left:50%; top:0; }
+  .f-heart .dt-label{
+    position:absolute; top:52%; left:50%;
+    transform:translate(-50%,-50%) rotate(45deg);
+    font-family:'Dancing Script', cursive;
+    font-weight:700; color:rgba(255,255,255,0.85);
+    white-space:nowrap;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    8%{ opacity:0.9; }
+    100%{ transform:translateY(-115vh) translateX(var(--drift,20px)) rotate(20deg); opacity:0; }
+  }
+  @keyframes spin{ from{transform:rotate(-45deg);} to{transform:rotate(315deg);} }
+
+  .click-heart{
+    position:fixed; pointer-events:none; z-index:999;
+    font-size:22px; animation:popFade 900ms ease-out forwards;
+  }
+  @keyframes popFade{
+    0%{ transform:translateY(0) scale(0.6); opacity:1; }
+    100%{ transform:translateY(-80px) scale(1.3); opacity:0; }
+  }
+
+  /* ---------- Layout ---------- */
+  .app{ position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
+
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; position:sticky; top:0; z-index:5;
+    backdrop-filter:blur(6px);
+    background:rgba(20,5,15,0.35);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  header.topbar.hidden{ display:none; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:1.1rem; }
+  .brand .mini-heart{
+    width:30px;height:28px; position:relative;
+  }
+  .nav-btns{ display:flex; gap:8px; }
+  .nav-btns button{
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+    color:var(--text); padding:7px 12px; border-radius:20px; font-size:0.85rem; cursor:pointer;
+    font-family:'Poppins',sans-serif;
+  }
+  .nav-btns button:hover{ background:rgba(255,255,255,0.22); }
+
+  main{ flex:1; display:flex; align-items:center; justify-content:center; padding:30px 16px 60px; }
+
+  .screen{ display:none; width:100%; max-width:720px; text-align:center; animation:fadeIn 0.5s ease; }
+  .screen.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+
+  /* ---------- Big DT heart logo ---------- */
+  .dt-heart{
+    width:220px; height:220px; margin:0 auto 10px;
+    position:relative;
+    filter:drop-shadow(0 10px 30px rgba(255,77,121,0.55));
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  .dt-heart .shape{
+    position:absolute; inset:0; transform:rotate(-45deg);
+    background:linear-gradient(135deg, var(--gold), var(--rose) 40%, var(--purple));
+    border-radius:0;
+  }
+  .dt-heart .shape::before, .dt-heart .shape::after{
+    content:""; position:absolute; width:100%; height:100%; border-radius:50%;
+    background:inherit;
+  }
+  .dt-heart .shape::before{ top:-50%; left:0; }
+  .dt-heart .shape::after{ left:50%; top:0; }
+  .dt-heart .initials{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display', serif; font-weight:700; font-size:3.4rem;
+    color:#fff; letter-spacing:2px;
+    text-shadow:0 2px 12px rgba(0,0,0,0.35);
+    z-index:2;
+  }
+  @keyframes pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.045); } }
+
+  .tagline{ color:var(--muted); font-size:1.05rem; margin:14px 0 28px; line-height:1.6; }
+
+  .btn{
+    display:inline-block; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--rose), var(--rose-deep));
+    color:#fff; font-family:'Poppins',sans-serif; font-weight:600;
+    padding:14px 30px; border-radius:40px; font-size:1rem;
+    box-shadow:0 8px 24px rgba(201,24,74,0.45);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{ transform:translateY(-2px) scale(1.03); box-shadow:0 12px 30px rgba(201,24,74,0.55); }
+  .btn.secondary{ background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); box-shadow:none; }
+  .btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.35); box-shadow:none; }
+
+  /* Character select */
+  .choices{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+  .choice-card{
+    width:220px; padding:26px 18px; border-radius:22px;
+    background:var(--card); border:1px solid var(--card-border);
+    cursor:pointer; transition:transform .2s ease, background .2s ease;
+  }
+  .choice-card:hover{ transform:translateY(-6px); background:rgba(255,255,255,0.14); }
+  .choice-card .emoji{ font-size:3rem; display:block; margin-bottom:8px; }
+  .choice-card h3{ font-family:'Dancing Script',cursive; font-size:1.8rem; margin-bottom:6px; }
+  .choice-card p{ color:var(--muted); font-size:0.88rem; margin:0; }
+
+  /* Dashboard grid */
+  .hello{ font-size:1.1rem; color:var(--muted); margin-bottom:6px; }
+  .grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:24px;
+  }
+  @media (max-width:560px){ .grid{ grid-template-columns:1fr; } }
+  .tile{
+    background:var(--card); border:1px solid var(--card-border); border-radius:18px;
+    padding:20px 14px; cursor:pointer; transition:transform .15s ease, background .15s ease;
+    text-align:left;
+  }
+  .tile:hover{ transform:translateY(-4px); background:rgba(255,255,255,0.14); }
+  .tile .emoji{ font-size:1.8rem; }
+  .tile h4{ margin:8px 0 4px; font-family:'Playfair Display',serif; font-size:1.05rem; }
+  .tile p{ margin:0; font-size:0.8rem; color:var(--muted); }
+
+  /* Quiz */
+  .progress{ color:var(--muted); font-size:0.85rem; margin-bottom:6px; }
+  .q-card{
+    background:var(--card); border:1px solid var(--card-border); border-radius:22px;
+    padding:30px 22px; margin-top:10px;
+  }
+  .q-card h3{ font-size:1.3rem; margin-bottom:22px; line-height:1.4; }
+  .options{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:520px){ .options{ grid-template-columns:1fr; } }
+  .opt-btn{
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.25);
+    color:var(--text); padding:14px 10px; border-radius:14px; cursor:pointer;
+    font-family:'Poppins',sans-serif; font-size:0.95rem; transition:all .15s ease;
+  }
+  .opt-btn:hover{ background:rgba(255,255,255,0.2); transform:scale(1.02); }
+  .response-box{
+    margin-top:18px; min-height:30px; font-style:italic; color:var(--gold); font-size:0.95rem;
+  }
+
+  .result-wrap{ padding:10px; }
+  .result-percent{
+    font-size:4.5rem; font-family:'Playfair Display',serif; font-weight:700;
+    background:linear-gradient(135deg,var(--gold),var(--rose));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .badge{
+    display:inline-block; margin-top:10px; padding:6px 16px; border-radius:20px;
+    background:rgba(255,209,102,0.15); border:1px solid var(--gold); color:var(--gold);
+    font-size:0.8rem; letter-spacing:1px; text-transform:uppercase;
+  }
+
+  /* Feature screens */
+  .feature-card{
+    background:var(--card); border:1px solid var(--card-border); border-radius:22px;
+    padding:34px 24px; margin-top:10px;
+  }
+  .big-stat{ font-size:2.1rem; font-family:'Playfair Display',serif; margin:10px 0; }
+  .sub-stat{ color:var(--muted); font-size:0.9rem; }
+  input[type="date"]{
+    font-family:'Poppins',sans-serif; padding:10px 14px; border-radius:12px; border:1px solid var(--card-border);
+    background:rgba(255,255,255,0.08); color:var(--text); font-size:0.95rem; margin-bottom:14px;
+  }
+  .note-box{
+    min-height:90px; display:flex; align-items:center; justify-content:center;
+    font-family:'Dancing Script',cursive; font-size:1.5rem; line-height:1.4; padding:10px 6px;
+  }
+  .fortune-card{
+    min-height:110px; display:flex; align-items:center; justify-content:center; text-align:center;
+    font-size:1.15rem; padding:10px;
+  }
+  .meter-wrap{ margin:24px 0; }
+  .meter-track{
+    position:relative; height:26px; border-radius:20px; background:rgba(255,255,255,0.1);
+    overflow:hidden; border:1px solid var(--card-border);
+  }
+  .meter-fill{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg, var(--purple), var(--rose), var(--gold));
+    transition:width 1.4s cubic-bezier(.2,.8,.2,1);
+  }
+  .meter-labels{ display:flex; justify-content:space-between; font-size:0.85rem; color:var(--muted); margin-top:8px; }
+  input[type="range"]{ width:100%; margin-top:16px; accent-color:var(--rose); }
+  .letter-text{
+    text-align:left; font-size:1.05rem; line-height:1.9; min-height:160px;
+    white-space:pre-wrap;
+  }
+  footer{
+    text-align:center; padding:18px; color:var(--muted); font-size:0.8rem; position:relative; z-index:1;
+  }
+  .row-actions{ margin-top:22px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<div id="heartsBg"></div>
+
+<div class="app">
+  <header class="topbar hidden" id="topbar">
+    <div class="brand">
+      <div class="mini-heart">
+        <svg viewBox="0 0 32 28" width="30" height="26">
+          <path d="M16 26 C16 26 2 17 2 8.5 C2 3 7 1 10 1 C13 1 15 3 16 6 C17 3 19 1 22 1 C25 1 30 3 30 8.5 C30 17 16 26 16 26 Z" fill="url(#g1)"/>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffd166"/><stop offset="55%" stop-color="#ff4d79"/><stop offset="100%" stop-color="#8a2be2"/>
+          </linearGradient></defs>
+        </svg>
+      </div>
+      <span>Doga <span class="script">&amp;</span> Tan</span>
+    </div>
+    <div class="nav-btns">
+      <button onclick="showScreen('dashboard')">🏠 Home</button>
+      <button onclick="switchPlayer()">🔁 Switch</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- INTRO -->
+    <section class="screen active" id="screen-intro">
+      <div class="dt-heart"><div class="shape"></div><div class="initials">DT</div></div>
+      <h1 class="script" style="font-size:2.6rem;">Doga &amp; Tan</h1>
+      <p class="tagline">A tiny universe where one scientific fact can never be changed, no matter which button you press:<br><strong>Tan loves more.</strong> 💘</p>
+      <button class="btn" onclick="showScreen('select')">Begin Our Story →</button>
+    </section>
+
+    <!-- CHARACTER SELECT -->
+    <section class="screen" id="screen-select">
+      <h2 style="margin-bottom:6px;">Who are you? 🧐</h2>
+      <p class="tagline" style="margin-top:0;">Pick a side. The universe already picked a winner.</p>
+      <div class="choices">
+        <div class="choice-card" onclick="selectCharacter('Doga')">
+          <span class="emoji">👩‍🦰</span>
+          <h3>Doga</h3>
+          <p>The girl side. Loved beyond measure. Still loses the leaderboard.</p>
+        </div>
+        <div class="choice-card" onclick="selectCharacter('Tan')">
+          <span class="emoji">🧔</span>
+          <h3>Tan</h3>
+          <p>The boy side. Undefeated champion of loving more. Allegedly.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="screen" id="screen-dashboard">
+      <p class="hello" id="helloText">Hi!</p>
+      <h2>What do you want to do? 💞</h2>
+      <div class="grid">
+        <div class="tile" onclick="startQuiz()">
+          <div class="emoji">💘</div>
+          <h4>Who Loves More?</h4>
+          <p>A totally fair, unbiased, scientific quiz.</p>
+        </div>
+        <div class="tile" onclick="showScreen('days')">
+          <div class="emoji">📅</div>
+          <h4>Our Days Together</h4>
+          <p>A live counter of us.</p>
+        </div>
+        <div class="tile" onclick="showScreen('notes')">
+          <div class="emoji">💌</div>
+          <h4>Love Notes</h4>
+          <p>Reasons Tan loves Doga, on demand.</p>
+        </div>
+        <div class="tile" onclick="showScreen('fortune')">
+          <div class="emoji">🔮</div>
+          <h4>Love Fortune</h4>
+          <p>Shake the universe for a cute prediction.</p>
+        </div>
+        <div class="tile" onclick="showScreen('meter')">
+          <div class="emoji">🎯</div>
+          <h4>Love Meter</h4>
+          <p>Try to tip the scale. You cannot.</p>
+        </div>
+        <div class="tile" onclick="openLetter()">
+          <div class="emoji">✍️</div>
+          <h4>Secret Letter</h4>
+          <p>A little something from Tan to Doga.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section class="screen" id="screen-quiz">
+      <div class="progress" id="quizProgress">Question 1 / 8</div>
+      <div class="q-card">
+        <h3 id="quizQuestion">Loading…</h3>
+        <div class="options" id="quizOptions"></div>
+        <div class="response-box" id="quizResponse"></div>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="screen" id="screen-result">
+      <div class="result-wrap">
+        <div class="badge">Peer-reviewed result</div>
+        <h2 style="margin-top:14px;">The verdict is in</h2>
+        <div class="result-percent" id="resultPercent">0%</div>
+        <p class="tagline" id="resultLine">Tan loves more. Case closed.</p>
+        <div class="row-actions">
+          <button class="btn" onclick="startQuiz()">Run It Again</button>
+          <button class="btn secondary" onclick="showScreen('dashboard')">Back Home</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DAYS TOGETHER -->
+    <section class="screen" id="screen-days">
+      <h2>Our Days Together 📅</h2>
+      <div class="feature-card">
+        <div id="daysSetup">
+          <p class="sub-stat">When did your story start?</p>
+          <input type="date" id="startDateInput">
+          <div><button class="btn" onclick="saveStartDate()">Start Counting</button></div>
+        </div>
+        <div id="daysDisplay" style="display:none;">
+          <div class="big-stat" id="daysCount">0 days</div>
+          <div class="sub-stat" id="daysSub"></div>
+          <div class="row-actions">
+            <button class="btn ghost" onclick="resetStartDate()">Change Date</button>
+          </div>
+        </div>
+      </div>
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
+    </section>
+
+    <!-- LOVE NOTES -->
+    <section class="screen" id="screen-notes">
+      <h2>Love Notes 💌</h2>
+      <div class="feature-card">
+        <div class="note-box" id="noteBox">Press the button for a reason Tan loves Doga.</div>
+        <div class="row-actions"><button class="btn" onclick="newNote()">Give Me a Reason 💗</button></div>
+      </div>
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
+    </section>
+
+    <!-- FORTUNE -->
+    <section class="screen" id="screen-fortune">
+      <h2>Love Fortune 🔮</h2>
+      <div class="feature-card">
+        <div class="fortune-card" id="fortuneBox">Tap below to reveal your fortune.</div>
+        <div class="row-actions"><button class="btn" onclick="newFortune()">Reveal Fortune ✨</button></div>
+      </div>
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
+    </section>
+
+    <!-- METER -->
+    <section class="screen" id="screen-meter">
+      <h2>Love Meter 🎯</h2>
+      <div class="feature-card">
+        <p class="sub-stat">Drag the slider to decide who loves more. Good luck.</p>
+        <input type="range" id="meterRange" min="0" max="100" value="50">
+        <div class="meter-wrap">
+          <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+          <div class="meter-labels"><span>Doga</span><span id="meterText">Tan: —</span></div>
+        </div>
+      </div>
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
+    </section>
+
+    <!-- LETTER -->
+    <section class="screen" id="screen-letter">
+      <h2>A Secret Letter ✍️</h2>
+      <div class="feature-card">
+        <div class="letter-text" id="letterText"></div>
+        <div class="row-actions"><button class="btn ghost" onclick="openLetter()">Replay</button></div>
+      </div>
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
+    </section>
+
+  </main>
+
+  <footer>Made with 💘 by Tan, for Doga.</footer>
+</div>
+
+<script>
+/* ---------------- Floating hearts background ---------------- */
+function spawnFloatingHearts(count){
+  const bg = document.getElementById('heartsBg');
+  const colors = ['#ff4d79','#ff8fab','#8a2be2','#ffd166','#c9184a'];
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'f-heart';
+    const size = 14 + Math.random()*26;
+    const left = Math.random()*100;
+    const duration = 9 + Math.random()*10;
+    const delay = Math.random()*14;
+    const drift = (Math.random()*160 - 80) + 'px';
+    const color = colors[Math.floor(Math.random()*colors.length)];
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    el.style.left = left+'vw';
+    el.style.setProperty('--drift', drift);
+    el.style.animationDuration = duration+'s';
+    el.style.animationDelay = delay+'s';
+    const shape = document.createElement('div');
+    shape.className = 'shape';
+    shape.style.background = color;
+    shape.style.animationDuration = (4+Math.random()*4)+'s';
+    el.appendChild(shape);
+    if(i % 6 === 0){
+      const label = document.createElement('div');
+      label.className = 'dt-label';
+      label.textContent = 'DT';
+      label.style.fontSize = Math.max(8, size*0.3)+'px';
+      el.appendChild(label);
+    }
+    bg.appendChild(el);
+  }
+}
+spawnFloatingHearts(28);
+
+/* click anywhere -> little heart pop */
+let lastClickHeart = 0;
+document.addEventListener('click', (e)=>{
+  const now = Date.now();
+  if(now - lastClickHeart < 120) return;
+  lastClickHeart = now;
+  const h = document.createElement('div');
+  h.className = 'click-heart';
+  h.textContent = ['💗','💕','💖','💘'][Math.floor(Math.random()*4)];
+  h.style.left = (e.clientX - 10) + 'px';
+  h.style.top = (e.clientY - 10) + 'px';
+  document.body.appendChild(h);
+  setTimeout(()=> h.remove(), 900);
+});
+
+/* ---------------- Screen navigation ---------------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  const topbar = document.getElementById('topbar');
+  topbar.classList.toggle('hidden', id === 'intro' || id === 'select');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(id === 'days') renderDays();
+  if(id === 'letter') {} // handled by openLetter()
+}
+
+let player = localStorage.getItem('dt_player') || null;
+
+function selectCharacter(name){
+  player = name;
+  localStorage.setItem('dt_player', name);
+  updateHello();
+  showScreen('dashboard');
+  burstHearts();
+}
+function switchPlayer(){
+  showScreen('select');
+}
+function updateHello(){
+  const el = document.getElementById('helloText');
+  if(player === 'Tan'){
+    el.textContent = 'Hi Tan 😏 Ready to prove it (again)?';
+  } else if(player === 'Doga'){
+    el.textContent = 'Hi Doga 💗 Let\'s see what the universe says...';
+  } else {
+    el.textContent = 'Hi!';
+  }
+}
+if(player){ updateHello(); }
+
+/* ---------------- Confetti heart burst ---------------- */
+function burstHearts(n=22){
+  for(let i=0;i<n;i++){
+    const h = document.createElement('div');
+    h.className = 'click-heart';
+    h.style.fontSize = (16 + Math.random()*20)+'px';
+    h.textContent = ['💗','💕','💖','💘','❤️'][Math.floor(Math.random()*5)];
+    const x = window.innerWidth/2 + (Math.random()*300-150);
+    const y = window.innerHeight/2 + (Math.random()*100-50);
+    h.style.left = x+'px';
+    h.style.top = y+'px';
+    h.style.animationDuration = (700+Math.random()*500)+'ms';
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), 1300);
+  }
+}
+
+/* ---------------- Quiz ---------------- */
+const quizData = [
+  { q:"Who texts first in the morning?",
+    opts:[
+      {l:"Doga", r:"Nope — Tan already sent three texts before Doga woke up."},
+      {l:"Tan", r:"Correct. Tan, obviously, at 7:01am sharp."},
+      {l:"The group chat", r:"The group chat is loud, but Tan is louder about loving Doga."},
+      {l:"Nobody, telepathy", r:"Even telepathically, it's Tan sending the first thought."}
+    ]},
+  { q:"Who remembers the little details?",
+    opts:[
+      {l:"Doga", r:"Close, but Tan remembers the details AND the backstory."},
+      {l:"Tan", r:"Yes. Tan has a mental folder labeled 'Everything About Doga'."},
+      {l:"Both equally", r:"Nice try — the folder is bigger on Tan's side."},
+      {l:"Neither, we forget everything", r:"Tan still remembers more than that, somehow."}
+    ]},
+  { q:"Who gets more nervous before seeing the other?",
+    opts:[
+      {l:"Doga", r:"Doga is cool as ice. Tan is internally panicking from excitement."},
+      {l:"Tan", r:"Confirmed. Tan's heart rate says it all."},
+      {l:"Both", r:"Statistically, Tan's heart rate monitor disagrees — it's higher."},
+      {l:"Neither", r:"Tan would like to introduce you to his pulse."}
+    ]},
+  { q:"Who brags about the other more to friends?",
+    opts:[
+      {l:"Doga", r:"Doga is modest about it. Tan has a whole PowerPoint."},
+      {l:"Tan", r:"Yes, Tan has literally made a slideshow. Twice."},
+      {l:"Our moms", r:"Even the moms learned it from Tan first."},
+      {l:"Nobody brags", r:"Tan respectfully disagrees, loudly, to everyone."}
+    ]},
+  { q:"Who would survive longer in a long-distance situation, loving harder the whole time?",
+    opts:[
+      {l:"Doga", r:"Doga would do great. Tan would do great-er."},
+      {l:"Tan", r:"Correct, Tan's love doesn't need wifi."},
+      {l:"Carrier pigeon", r:"The pigeon delivers Tan's extra love letters."},
+      {l:"Both tie", r:"The scoreboard says otherwise: Tan +1."}
+    ]},
+  { q:"Who saved more cute photos of the other?",
+    opts:[
+      {l:"Doga", r:"Doga has a nice album. Tan has three albums and a backup drive."},
+      {l:"Tan", r:"Correct, Tan's camera roll is 73% Doga."},
+      {l:"The cloud storage company", r:"They just host what Tan keeps saving."},
+      {l:"Neither of us takes photos", r:"Tan definitely does, secretly, lovingly."}
+    ]},
+  { q:"Who would give up the last slice of pizza?",
+    opts:[
+      {l:"Doga", r:"A real sacrifice! But Tan would give up the whole pizza."},
+      {l:"Tan", r:"Yes. Tan would give up pizza itself, for Doga."},
+      {l:"Neither, we share", r:"Sharing is sweet, but Tan still loves more while sharing."},
+      {l:"The pizza loves us both", r:"Even the pizza knows Tan loves more."}
+    ]},
+  { q:"Final question: who loves more, scientifically speaking?",
+    opts:[
+      {l:"Doga", r:"A bold guess! The lab results disagree: it's Tan."},
+      {l:"Tan", r:"Exactly right. The data has spoken."},
+      {l:"It's complicated", r:"It's actually very simple. It's Tan."},
+      {l:"We need more research", r:"Research complete. Result: Tan."}
+    ]}
+  ];
+
+let quizIndex = 0;
+function startQuiz(){
+  quizIndex = 0;
+  showScreen('quiz');
+  renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  const total = quizData.length;
+  document.getElementById('quizProgress').textContent = `Question ${quizIndex+1} / ${total}`;
+  const item = quizData[quizIndex];
+  document.getElementById('quizQuestion').textContent = item.q;
+  document.getElementById('quizResponse').textContent = '';
+  const optsWrap = document.getElementById('quizOptions');
+  optsWrap.innerHTML = '';
+  item.opts.forEach((opt)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.textContent = opt.l;
+    b.onclick = ()=> answerQuiz(opt.r);
+    optsWrap.appendChild(b);
+  });
+}
+function answerQuiz(responseText){
+  document.getElementById('quizResponse').textContent = responseText;
+  document.querySelectorAll('#quizOptions .opt-btn').forEach(b=> b.disabled = true);
+  setTimeout(()=>{
+    quizIndex++;
+    if(quizIndex < quizData.length){
+      document.querySelectorAll('#quizOptions .opt-btn').forEach(b=> b.disabled = false);
+      renderQuizQuestion();
+    } else {
+      showResult();
+    }
+  }, 1300);
+}
+function showResult(){
+  showScreen('result');
+  const lines = [
+    "Tan loves more. Peer-reviewed, triple-checked, undisputed.",
+    "The data is in: Tan's love levels are literally off the chart.",
+    "Verdict: Tan loves more. Appeals will be denied with a kiss.",
+    "Science, math, and Tan's heart all agree: Tan loves more."
+  ];
+  document.getElementById('resultLine').textContent = lines[Math.floor(Math.random()*lines.length)];
+  const target = 97 + Math.floor(Math.random()*4); // 97-100
+  let current = 0;
+  const el = document.getElementById('resultPercent');
+  const step = ()=>{
+    current += Math.max(1, Math.round((target-current)/6));
+    if(current >= target){ current = target; }
+    el.textContent = current + '%';
+    if(current < target){ requestAnimationFrame(step); } else { burstHearts(30); }
+  };
+  step();
+}
+
+/* ---------------- Days Together ---------------- */
+function renderDays(){
+  const saved = localStorage.getItem('dt_startDate');
+  if(saved){
+    document.getElementById('daysSetup').style.display = 'none';
+    document.getElementById('daysDisplay').style.display = 'block';
+    tickDays(saved);
+    if(window._daysInterval) clearInterval(window._daysInterval);
+    window._daysInterval = setInterval(()=> tickDays(saved), 1000);
+  } else {
+    document.getElementById('daysSetup').style.display = 'block';
+    document.getElementById('daysDisplay').style.display = 'none';
+  }
+}
+function tickDays(dateStr){
+  const start = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - start;
+  if(diffMs < 0){
+    document.getElementById('daysCount').textContent = "The best is yet to come 💫";
+    document.getElementById('daysSub').textContent = "Your story hasn't started yet!";
+    return;
+  }
+  const days = Math.floor(diffMs/86400000);
+  const hours = Math.floor((diffMs%86400000)/3600000);
+  const mins = Math.floor((diffMs%3600000)/60000);
+  const secs = Math.floor((diffMs%60000)/1000);
+  document.getElementById('daysCount').textContent = `${days} days of us 💞`;
+  document.getElementById('daysSub').textContent = `${hours}h ${mins}m ${secs}s and counting — and Tan loved you for every second of it.`;
+}
+function saveStartDate(){
+  const val = document.getElementById('startDateInput').value;
+  if(!val){ return; }
+  localStorage.setItem('dt_startDate', val);
+  renderDays();
+}
+function resetStartDate(){
+  localStorage.removeItem('dt_startDate');
+  renderDays();
+}
+
+/* ---------------- Love Notes ---------------- */
+const loveNotes = [
+  "Tan loves the way Doga laughs at her own jokes before even finishing them.",
+  "Tan loves how Doga steals the blanket and still looks adorable doing it.",
+  "Tan loves the way Doga says 'one more episode' and means five.",
+  "Tan loves how Doga's voice changes when she talks to animals.",
+  "Tan loves that Doga remembers things Tan said three years ago.",
+  "Tan loves how Doga can turn any ordinary day into an adventure.",
+  "Tan loves the way Doga scrunches her nose when something's too sweet.",
+  "Tan loves that Doga argues with the TV during movies.",
+  "Tan loves how Doga makes the worst days feel okay with one message.",
+  "Tan loves the way Doga says his name when she's about to tease him.",
+  "Tan loves that Doga has strong opinions about pineapple on pizza.",
+  "Tan loves how Doga falls asleep mid-sentence and insists she's awake.",
+  "Tan loves that Doga believes in him more than he believes in himself.",
+  "Tan loves the way Doga hums without realizing it.",
+  "Tan loves how Doga's hugs fix almost anything.",
+  "Tan loves that Doga still gets excited over small things.",
+  "Tan loves how Doga makes plans for a future Tan can't wait to live in.",
+  "Tan loves that no matter the distance, Doga feels close.",
+  "Tan loves that being loved by Doga is the easiest, best part of his day.",
+  "Tan loves Doga. Simple as that. No further reasons required."
+];
+let lastNote = -1;
+function newNote(){
+  let idx;
+  do{ idx = Math.floor(Math.random()*loveNotes.length); } while(idx === lastNote);
+  lastNote = idx;
+  document.getElementById('noteBox').textContent = loveNotes[idx];
+}
+
+/* ---------------- Love Fortune ---------------- */
+const fortunes = [
+  "🔮 A surprise message is coming your way, and it has a heart emoji in it.",
+  "🔮 Someone is smiling at their phone right now, and it's because of you.",
+  "🔮 This week holds an extra hug, scheduled by the universe.",
+  "🔮 Tan's love levels are predicted to rise, which was already impossible.",
+  "🔮 A future trip together is being quietly planned in someone's head.",
+  "🔮 You will be told you're loved today. Possibly right now.",
+  "🔮 Good things are coming — and they involve the two of you.",
+  "🔮 Someone is about to say something that makes you smile for an hour.",
+  "🔮 A song will remind you of this exact moment, forever.",
+  "🔮 The stars confirm it: you are, in fact, very loved.",
+  "🔮 Your next video call will run twenty minutes longer than planned.",
+  "🔮 A tiny inside joke will make an unexpected comeback soon.",
+  "🔮 The future contains more laughing, more hugging, less waiting.",
+  "🔮 Someone saved a photo of you as their lock screen. Just saying.",
+  "🔮 All signs point to: Tan loves more, and it's only growing."
+];
+let lastFortune = -1;
+function newFortune(){
+  let idx;
+  do{ idx = Math.floor(Math.random()*fortunes.length); } while(idx === lastFortune);
+  lastFortune = idx;
+  const box = document.getElementById('fortuneBox');
+  box.style.opacity = 0;
+  setTimeout(()=>{
+    box.textContent = fortunes[idx];
+    box.style.transition = 'opacity .4s ease';
+    box.style.opacity = 1;
+  }, 200);
+}
+
+/* ---------------- Love Meter ---------------- */
+const meterRange = document.getElementById('meterRange');
+const meterFill = document.getElementById('meterFill');
+const meterText = document.getElementById('meterText');
+function snapMeter(){
+  const target = 97 + Math.floor(Math.random()*4);
+  let current = parseInt(meterFill.style.width) || 0;
+  meterFill.style.width = target + '%';
+  meterText.textContent = 'Tan: ' + target + '%';
+  meterRange.value = target;
+}
+meterRange.addEventListener('input', ()=>{
+  meterText.textContent = 'Calculating...';
+});
+meterRange.addEventListener('change', snapMeter);
+meterRange.addEventListener('mouseup', snapMeter);
+meterRange.addEventListener('touchend', snapMeter);
+
+/* ---------------- Secret Letter ---------------- */
+const letterContent = `My dearest Doga,
+
+If you're reading this, it means this silly little app actually worked, and somehow that makes me smile even more than I already do when I think about you (which, fair warning, is constantly).
+
+I made this because I wanted to give you something only you would understand — hearts everywhere, our initials tangled together, and a quiz that's rigged on purpose, because some things shouldn't be left up to chance.
+
+So here it is, officially, scientifically, and emotionally confirmed:
+
+Tan loves Doga more. Today, tomorrow, and on every single day this little counter keeps counting.
+
+Yours, always,
+Tan 💘`;
+
+function openLetter(){
+  showScreen('letter');
+  typeLetter();
+}
+function typeLetter(){
+  const el = document.getElementById('letterText');
+  el.textContent = '';
+  let i = 0;
+  if(window._letterTimer) clearInterval(window._letterTimer);
+  window._letterTimer = setInterval(()=>{
+    el.textContent += letterContent[i];
+    i++;
+    if(i >= letterContent.length){ clearInterval(window._letterTimer); }
+  }, 18);
+}
+</script>
+</body>
+</html>
