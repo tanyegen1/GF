@@ -200,9 +200,37 @@
     font-family:'Poppins',sans-serif; font-size:0.95rem; transition:all .15s ease;
   }
   .opt-btn:hover{ background:rgba(255,255,255,0.2); transform:scale(1.02); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct-opt{ border-color:#2ecc71; background:rgba(46,204,113,0.22); color:#fff; }
+  .opt-btn.wrong-opt{ border-color:#ff1744; background:rgba(255,23,68,0.22); color:#fff; }
   .response-box{
     margin-top:18px; min-height:30px; font-style:italic; color:var(--gold); font-size:0.95rem;
   }
+  .feedback-icon{
+    display:none; align-items:center; justify-content:center;
+    width:84px; height:84px; margin:18px auto 0;
+    border-radius:50%; font-size:3rem; font-weight:800; line-height:1;
+  }
+  .feedback-icon.show{ display:flex; }
+  .feedback-icon.correct{
+    color:#2ecc71; border:4px solid #2ecc71; background:rgba(46,204,113,0.15);
+    animation:popBounce .5s ease;
+  }
+  .feedback-icon.wrong{
+    color:#ff1744; border:4px solid #ff1744; background:rgba(255,23,68,0.15);
+    animation:shakePop .5s ease;
+  }
+  @keyframes popBounce{
+    0%{ transform:scale(0); } 55%{ transform:scale(1.3); } 75%{ transform:scale(0.92); } 100%{ transform:scale(1); }
+  }
+  @keyframes shakePop{
+    0%{ transform:scale(0) rotate(0deg); }
+    35%{ transform:scale(1.25) rotate(-10deg); }
+    55%{ transform:scale(1.05) rotate(8deg); }
+    75%{ transform:scale(1.1) rotate(-5deg); }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  .skip-btn{ margin-top:20px; }
 
   .result-wrap{ padding:10px; }
   .result-percent{
@@ -352,7 +380,11 @@
       <div class="q-card">
         <h3 id="quizQuestion">Loading…</h3>
         <div class="options" id="quizOptions"></div>
+        <div class="feedback-icon" id="feedbackIcon"></div>
         <div class="response-box" id="quizResponse"></div>
+        <div class="row-actions skip-btn">
+          <button class="btn secondary" id="skipBtn" onclick="skipQuestion()">Skip ▶</button>
+        </div>
       </div>
     </section>
 
@@ -547,59 +579,59 @@ function burstHearts(n=22){
 const quizData = [
   { q:"Who texts first in the morning?",
     opts:[
-      {l:"Doga", r:"Nope — Tan already sent three texts before Doga woke up."},
-      {l:"Tan", r:"Correct. Tan, obviously, at 7:01am sharp."},
-      {l:"The group chat", r:"The group chat is loud, but Tan is louder about loving Doga."},
-      {l:"Nobody, telepathy", r:"Even telepathically, it's Tan sending the first thought."}
+      {l:"Doga", r:"Nope — Tan already sent three texts before Doga woke up.", c:false},
+      {l:"Tan", r:"Correct. Tan, obviously, at 7:01am sharp.", c:true},
+      {l:"The group chat", r:"The group chat is loud, but Tan is louder about loving Doga.", c:false},
+      {l:"Nobody, telepathy", r:"Even telepathically, it's Tan sending the first thought.", c:false}
     ]},
   { q:"Who remembers the little details?",
     opts:[
-      {l:"Doga", r:"Close, but Tan remembers the details AND the backstory."},
-      {l:"Tan", r:"Yes. Tan has a mental folder labeled 'Everything About Doga'."},
-      {l:"Both equally", r:"Nice try — the folder is bigger on Tan's side."},
-      {l:"Neither, we forget everything", r:"Tan still remembers more than that, somehow."}
+      {l:"Doga", r:"Close, but Tan remembers the details AND the backstory.", c:false},
+      {l:"Tan", r:"Yes. Tan has a mental folder labeled 'Everything About Doga'.", c:true},
+      {l:"Both equally", r:"Nice try — the folder is bigger on Tan's side.", c:false},
+      {l:"Neither, we forget everything", r:"Tan still remembers more than that, somehow.", c:false}
     ]},
   { q:"Who gets more nervous before seeing the other?",
     opts:[
-      {l:"Doga", r:"Doga is cool as ice. Tan is internally panicking from excitement."},
-      {l:"Tan", r:"Confirmed. Tan's heart rate says it all."},
-      {l:"Both", r:"Statistically, Tan's heart rate monitor disagrees — it's higher."},
-      {l:"Neither", r:"Tan would like to introduce you to his pulse."}
+      {l:"Doga", r:"Doga is cool as ice. Tan is internally panicking from excitement.", c:false},
+      {l:"Tan", r:"Confirmed. Tan's heart rate says it all.", c:true},
+      {l:"Both", r:"Statistically, Tan's heart rate monitor disagrees — it's higher.", c:false},
+      {l:"Neither", r:"Tan would like to introduce you to his pulse.", c:false}
     ]},
   { q:"Who brags about the other more to friends?",
     opts:[
-      {l:"Doga", r:"Doga is modest about it. Tan has a whole PowerPoint."},
-      {l:"Tan", r:"Yes, Tan has literally made a slideshow. Twice."},
-      {l:"Our moms", r:"Even the moms learned it from Tan first."},
-      {l:"Nobody brags", r:"Tan respectfully disagrees, loudly, to everyone."}
+      {l:"Doga", r:"Doga is modest about it. Tan has a whole PowerPoint.", c:false},
+      {l:"Tan", r:"Yes, Tan has literally made a slideshow. Twice.", c:true},
+      {l:"Our moms", r:"Even the moms learned it from Tan first.", c:false},
+      {l:"Nobody brags", r:"Tan respectfully disagrees, loudly, to everyone.", c:false}
     ]},
   { q:"Who would survive longer in a long-distance situation, loving harder the whole time?",
     opts:[
-      {l:"Doga", r:"Doga would do great. Tan would do great-er."},
-      {l:"Tan", r:"Correct, Tan's love doesn't need wifi."},
-      {l:"Carrier pigeon", r:"The pigeon delivers Tan's extra love letters."},
-      {l:"Both tie", r:"The scoreboard says otherwise: Tan +1."}
+      {l:"Doga", r:"Doga would do great. Tan would do great-er.", c:false},
+      {l:"Tan", r:"Correct, Tan's love doesn't need wifi.", c:true},
+      {l:"Carrier pigeon", r:"The pigeon delivers Tan's extra love letters.", c:false},
+      {l:"Both tie", r:"The scoreboard says otherwise: Tan +1.", c:false}
     ]},
   { q:"Who saved more cute photos of the other?",
     opts:[
-      {l:"Doga", r:"Doga has a nice album. Tan has three albums and a backup drive."},
-      {l:"Tan", r:"Correct, Tan's camera roll is 73% Doga."},
-      {l:"The cloud storage company", r:"They just host what Tan keeps saving."},
-      {l:"Neither of us takes photos", r:"Tan definitely does, secretly, lovingly."}
+      {l:"Doga", r:"Doga has a nice album. Tan has three albums and a backup drive.", c:false},
+      {l:"Tan", r:"Correct, Tan's camera roll is 73% Doga.", c:true},
+      {l:"The cloud storage company", r:"They just host what Tan keeps saving.", c:false},
+      {l:"Neither of us takes photos", r:"Tan definitely does, secretly, lovingly.", c:false}
     ]},
   { q:"Who would give up the last slice of pizza?",
     opts:[
-      {l:"Doga", r:"A real sacrifice! But Tan would give up the whole pizza."},
-      {l:"Tan", r:"Yes. Tan would give up pizza itself, for Doga."},
-      {l:"Neither, we share", r:"Sharing is sweet, but Tan still loves more while sharing."},
-      {l:"The pizza loves us both", r:"Even the pizza knows Tan loves more."}
+      {l:"Doga", r:"A real sacrifice! But Tan would give up the whole pizza.", c:false},
+      {l:"Tan", r:"Yes. Tan would give up pizza itself, for Doga.", c:true},
+      {l:"Neither, we share", r:"Sharing is sweet, but Tan still loves more while sharing.", c:false},
+      {l:"The pizza loves us both", r:"Even the pizza knows Tan loves more.", c:false}
     ]},
   { q:"Final question: who loves more, scientifically speaking?",
     opts:[
-      {l:"Doga", r:"A bold guess! The lab results disagree: it's Tan."},
-      {l:"Tan", r:"Exactly right. The data has spoken."},
-      {l:"It's complicated", r:"It's actually very simple. It's Tan."},
-      {l:"We need more research", r:"Research complete. Result: Tan."}
+      {l:"Doga", r:"A bold guess! The lab results disagree: it's Tan.", c:false},
+      {l:"Tan", r:"Exactly right. The data has spoken.", c:true},
+      {l:"It's complicated", r:"It's actually very simple. It's Tan.", c:false},
+      {l:"We need more research", r:"Research complete. Result: Tan.", c:false}
     ]}
   ];
 
@@ -615,28 +647,42 @@ function renderQuizQuestion(){
   const item = quizData[quizIndex];
   document.getElementById('quizQuestion').textContent = item.q;
   document.getElementById('quizResponse').textContent = '';
+  const icon = document.getElementById('feedbackIcon');
+  icon.className = 'feedback-icon';
+  icon.textContent = '';
   const optsWrap = document.getElementById('quizOptions');
   optsWrap.innerHTML = '';
   item.opts.forEach((opt)=>{
     const b = document.createElement('button');
     b.className = 'opt-btn';
     b.textContent = opt.l;
-    b.onclick = ()=> answerQuiz(opt.r);
+    b.onclick = ()=> answerQuiz(opt, b);
     optsWrap.appendChild(b);
   });
+  document.getElementById('skipBtn').textContent = (quizIndex === total-1) ? 'Skip to Result ▶' : 'Skip ▶';
 }
-function answerQuiz(responseText){
-  document.getElementById('quizResponse').textContent = responseText;
+function answerQuiz(opt, btn){
+  document.getElementById('quizResponse').textContent = opt.r;
   document.querySelectorAll('#quizOptions .opt-btn').forEach(b=> b.disabled = true);
-  setTimeout(()=>{
-    quizIndex++;
-    if(quizIndex < quizData.length){
-      document.querySelectorAll('#quizOptions .opt-btn').forEach(b=> b.disabled = false);
-      renderQuizQuestion();
-    } else {
-      showResult();
-    }
-  }, 1300);
+
+  btn.classList.add(opt.c ? 'correct-opt' : 'wrong-opt');
+  if(!opt.c){
+    const correctBtn = Array.from(document.querySelectorAll('#quizOptions .opt-btn'))
+      .find(b => b.textContent === quizData[quizIndex].opts.find(o=>o.c).l);
+    if(correctBtn) correctBtn.classList.add('correct-opt');
+  }
+
+  const icon = document.getElementById('feedbackIcon');
+  icon.className = 'feedback-icon show ' + (opt.c ? 'correct' : 'wrong');
+  icon.textContent = opt.c ? '✓' : '✕';
+}
+function skipQuestion(){
+  quizIndex++;
+  if(quizIndex < quizData.length){
+    renderQuizQuestion();
+  } else {
+    showResult();
+  }
 }
 function showResult(){
   showScreen('result');
