@@ -157,6 +157,60 @@
   .btn.secondary{ background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); box-shadow:none; }
   .btn.ghost{ background:transparent; border:1px solid rgba(255,255,255,0.35); box-shadow:none; }
 
+  /* ---------- Letter-finding intro game ---------- */
+  .game-heart{
+    width:140px; height:140px; margin:14px auto 30px; position:relative; cursor:pointer;
+    filter:drop-shadow(0 8px 22px rgba(255,77,121,0.5));
+    transition:transform .12s ease; user-select:none;
+  }
+  .game-heart:hover{ transform:scale(1.04); }
+  .game-heart:active, .game-heart.tapped{ transform:scale(0.9); }
+  .game-heart .shape{
+    position:absolute; inset:0; transform:rotate(-45deg);
+    background:linear-gradient(135deg, var(--gold), var(--rose) 45%, var(--purple));
+    animation:pulse 2s ease-in-out infinite;
+  }
+  .game-heart .shape::before, .game-heart .shape::after{
+    content:""; position:absolute; width:100%; height:100%; border-radius:50%; background:inherit;
+  }
+  .game-heart .shape::before{ top:-50%; left:0; }
+  .game-heart .shape::after{ left:50%; top:0; }
+  .game-heart .tap-label{
+    position:absolute; bottom:-28px; left:50%; transform:translateX(-50%);
+    font-size:0.85rem; color:var(--muted); white-space:nowrap; font-weight:600;
+  }
+  .game-heart-msg{
+    min-height:22px; color:var(--gold); font-size:0.9rem; font-style:italic; margin-bottom:6px;
+  }
+  .letter-boxes{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:8px;
+    margin:10px auto 6px; max-width:520px;
+  }
+  .letter-box{
+    width:34px; height:40px; border-radius:8px; border:2px dashed rgba(255,255,255,0.35);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif; font-weight:700; font-size:1.25rem;
+    color:var(--muted); background:rgba(255,255,255,0.05); transition:background .2s ease;
+  }
+  .letter-box.revealed{
+    border-style:solid; border-color:var(--gold); color:#fff;
+    background:linear-gradient(135deg, rgba(255,209,102,0.3), rgba(255,77,121,0.3));
+    animation:popBounce .4s ease;
+  }
+  @media (max-width:460px){ .letter-box{ width:25px; height:32px; font-size:1rem; } }
+  .lock-hint{ color:var(--muted); font-size:0.9rem; margin-top:14px; }
+  .password-section{ margin-top:22px; animation:fadeIn .5s ease; }
+  input[type="text"].pw-input{
+    font-family:'Poppins',sans-serif; padding:13px 18px; border-radius:16px;
+    border:2px solid var(--card-border); background:rgba(255,255,255,0.08); color:var(--text);
+    font-size:1.1rem; text-align:center; letter-spacing:3px; text-transform:uppercase;
+    width:280px; max-width:90%; margin-bottom:12px;
+  }
+  input[type="text"].pw-input:focus{ outline:none; border-color:var(--gold); }
+  .status-msg{ min-height:22px; font-size:0.9rem; margin-top:8px; }
+  .status-msg.success{ color:#2ecc71; font-weight:600; }
+  .status-msg.error{ color:#ff1744; animation:shakePop .4s ease; }
+
   /* Character select */
   .choices{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
   .choice-card{
@@ -315,7 +369,37 @@
       <div class="dt-heart"><div class="shape"></div><div class="initials">DT</div></div>
       <h1 class="script" style="font-size:2.6rem;">Doga &amp; Tan</h1>
       <p class="tagline">A tiny universe where one scientific fact can never be changed, no matter which button you press:<br><strong>Tan loves more.</strong> 💘</p>
-      <button class="btn" onclick="showScreen('select')">Begin Our Story →</button>
+      <button class="btn" onclick="startGame()">Begin Our Story →</button>
+    </section>
+
+    <!-- LETTER-FINDING GAME -->
+    <section class="screen" id="screen-game">
+      <h2>A Tiny Game Before We Begin 💘</h2>
+      <p class="tagline" style="margin-top:8px;">
+        Here's how it works:<br>
+        1️⃣ Tap the heart below — every tap reveals one secret letter.<br>
+        2️⃣ Collect all <strong>12</strong> letters in order.<br>
+        3️⃣ Then type the secret word you collected into the box to unlock the app!
+      </p>
+
+      <div class="game-heart" id="gameHeart" onclick="tapGameHeart()">
+        <div class="shape"></div>
+        <div class="tap-label">👆 Tap me!</div>
+      </div>
+
+      <div class="game-heart-msg" id="gameHeartMsg"></div>
+      <p class="sub-stat" id="gameCounter">0 / 12 letters found</p>
+      <div class="letter-boxes" id="letterBoxes"></div>
+      <p class="lock-hint" id="lockHint">🔒 Keep tapping the heart to reveal every letter.</p>
+
+      <div class="password-section" id="passwordSection" style="display:none;">
+        <p class="sub-stat">🎉 You found them all! Now type the secret word you just collected below:</p>
+        <div>
+          <input type="text" class="pw-input" id="passwordInput" placeholder="TYPE IT HERE" autocomplete="off" autocapitalize="characters" maxlength="24" onkeyup="if(event.key==='Enter') checkPassword()">
+        </div>
+        <button class="btn" onclick="checkPassword()">Unlock Our App 🔓</button>
+        <div class="status-msg" id="gameStatus"></div>
+      </div>
     </section>
 
     <!-- CHARACTER SELECT -->
@@ -528,7 +612,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
   const topbar = document.getElementById('topbar');
-  topbar.classList.toggle('hidden', id === 'intro' || id === 'select');
+  topbar.classList.toggle('hidden', id === 'intro' || id === 'game' || id === 'select');
   window.scrollTo({top:0, behavior:'smooth'});
   if(id === 'days') renderDays();
   if(id === 'letter') {} // handled by openLetter()
@@ -572,6 +656,84 @@ function burstHearts(n=22){
     h.style.animationDuration = (700+Math.random()*500)+'ms';
     document.body.appendChild(h);
     setTimeout(()=>h.remove(), 1300);
+  }
+}
+
+/* ---------------- Letter-finding intro game ---------------- */
+const secretWord = "TANLOVESDOGA";
+let gameFound = 0;
+
+function buildLetterBoxes(){
+  const wrap = document.getElementById('letterBoxes');
+  wrap.innerHTML = '';
+  for(let i=0;i<secretWord.length;i++){
+    const box = document.createElement('div');
+    box.className = 'letter-box';
+    wrap.appendChild(box);
+  }
+}
+function renderGameProgress(){
+  const boxes = document.querySelectorAll('#letterBoxes .letter-box');
+  boxes.forEach((box,i)=>{
+    if(i < gameFound){
+      box.classList.add('revealed');
+      box.textContent = secretWord[i];
+    } else {
+      box.classList.remove('revealed');
+      box.textContent = '';
+    }
+  });
+  document.getElementById('gameCounter').textContent = `${gameFound} / ${secretWord.length} letters found`;
+}
+function startGame(){
+  gameFound = 0;
+  buildLetterBoxes();
+  renderGameProgress();
+  document.getElementById('passwordSection').style.display = 'none';
+  document.getElementById('lockHint').style.display = 'block';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('gameStatus').textContent = '';
+  document.getElementById('gameStatus').className = 'status-msg';
+  document.getElementById('gameHeartMsg').textContent = '';
+  showScreen('game');
+}
+function tapGameHeart(){
+  const heart = document.getElementById('gameHeart');
+  heart.classList.add('tapped');
+  setTimeout(()=> heart.classList.remove('tapped'), 200);
+  const msg = document.getElementById('gameHeartMsg');
+  if(gameFound < secretWord.length){
+    gameFound++;
+    renderGameProgress();
+    msg.textContent = '';
+    if(gameFound === secretWord.length){
+      unlockPasswordSection();
+    }
+  } else {
+    msg.textContent = "You already found every letter! Scroll down 💕";
+  }
+}
+function unlockPasswordSection(){
+  document.getElementById('lockHint').style.display = 'none';
+  document.getElementById('passwordSection').style.display = 'block';
+  burstHearts(18);
+  setTimeout(()=>{
+    const input = document.getElementById('passwordInput');
+    if(input) input.focus();
+  }, 300);
+}
+function checkPassword(){
+  const input = document.getElementById('passwordInput');
+  const val = input.value.toUpperCase().replace(/\s+/g,'');
+  const status = document.getElementById('gameStatus');
+  if(val === secretWord){
+    status.textContent = "Correct! Unlocking our app... 💖";
+    status.className = 'status-msg success';
+    burstHearts(26);
+    setTimeout(()=> showScreen('select'), 1100);
+  } else {
+    status.textContent = "Not quite — check the letters you collected above and try again.";
+    status.className = 'status-msg error';
   }
 }
 
