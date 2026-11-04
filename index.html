@@ -269,6 +269,45 @@
   }
   .tile h4{ margin:0 0 5px; font-family:'Fraunces',serif; font-size:1.08rem; letter-spacing:0.2px; }
   .tile p{ margin:0; font-size:0.82rem; color:var(--muted); line-height:1.45; }
+  .tile-gift{
+    border-color:rgba(255,209,102,0.55);
+    background:linear-gradient(135deg, rgba(255,209,102,0.14), rgba(255,77,121,0.1));
+  }
+  .tile-gift .tile-icon{
+    background:linear-gradient(135deg, rgba(255,209,102,0.45), rgba(255,77,121,0.4));
+    animation:giftWiggle 2.4s ease-in-out infinite;
+  }
+
+  /* ---------- Gift video reveal ---------- */
+  .gift-wrap{ margin:34px 0 10px; display:flex; justify-content:center; }
+  .gift-box{
+    font-size:6rem; line-height:1; cursor:pointer; user-select:none; display:inline-block;
+    filter:drop-shadow(0 12px 26px rgba(255,77,121,0.45));
+    animation:giftWiggle 1.8s ease-in-out infinite;
+    transition:transform .2s ease;
+  }
+  .gift-box:hover{ transform:scale(1.06); }
+  .gift-box.opening{ animation:giftPop .6s ease forwards; pointer-events:none; }
+  @keyframes giftWiggle{
+    0%,100%{ transform:rotate(0deg) scale(1); }
+    10%{ transform:rotate(-8deg) scale(1.03); }
+    20%{ transform:rotate(8deg) scale(1.03); }
+    30%{ transform:rotate(-5deg); }
+    40%{ transform:rotate(5deg); }
+    50%,100%{ transform:rotate(0deg) scale(1); }
+  }
+  @keyframes giftPop{
+    0%{ transform:scale(1) rotate(0deg); opacity:1; }
+    45%{ transform:scale(1.4) rotate(12deg); opacity:1; }
+    100%{ transform:scale(0) rotate(30deg); opacity:0; }
+  }
+  .video-wrap{ margin:16px auto 10px; max-width:480px; animation:fadeIn .6s ease; }
+  .gift-video{
+    width:100%; display:block; border-radius:18px;
+    box-shadow:0 16px 40px rgba(0,0,0,0.5);
+    border:2px solid var(--card-border);
+    background:#000;
+  }
 
   /* Quiz */
   .progress{ color:var(--muted); font-size:0.85rem; margin-bottom:6px; }
@@ -457,6 +496,11 @@
       <h2 class="dash-title">What do you want to do?</h2>
       <p class="dash-sub">Pick an experience below 💞</p>
       <div class="grid">
+        <div class="tile tile-gift" onclick="openGift()">
+          <div class="tile-icon">🎁</div>
+          <h4>A Surprise For You</h4>
+          <p>Click the gift to open a little video 💌</p>
+        </div>
         <div class="tile" onclick="startQuiz()">
           <div class="tile-icon">💘</div>
           <h4>Who Loves More?</h4>
@@ -488,6 +532,25 @@
           <p>A little something from Tan to Doga.</p>
         </div>
       </div>
+    </section>
+
+    <!-- GIFT VIDEO -->
+    <section class="screen" id="screen-gift">
+      <h2 class="dash-title" style="margin-bottom:4px;">A Little Surprise 🎁</h2>
+      <p class="dash-sub" id="giftInstruction">Tap the gift below to open it...</p>
+
+      <div class="gift-wrap">
+        <div class="gift-box" id="giftBox" onclick="unwrapGift()">🎁</div>
+      </div>
+
+      <div class="video-wrap" id="videoWrap" style="display:none;">
+        <video id="giftVideo" class="gift-video" controls playsinline>
+          <source src="assets/our-video.mp4" type="video/mp4">
+          Your browser doesn't support embedded video.
+        </video>
+      </div>
+
+      <div class="row-actions"><button class="btn secondary" onclick="showScreen('dashboard')">← Back</button></div>
     </section>
 
     <!-- QUIZ -->
@@ -689,6 +752,35 @@ function burstHearts(n=22){
     document.body.appendChild(h);
     setTimeout(()=>h.remove(), 1300);
   }
+}
+
+/* ---------------- Gift video reveal ---------------- */
+function openGift(){
+  resetGift();
+  showScreen('gift');
+}
+function resetGift(){
+  const box = document.getElementById('giftBox');
+  box.classList.remove('opening');
+  box.style.display = '';
+  document.getElementById('videoWrap').style.display = 'none';
+  document.getElementById('giftInstruction').textContent = 'Tap the gift below to open it...';
+  const vid = document.getElementById('giftVideo');
+  if(vid){ vid.pause(); vid.currentTime = 0; }
+}
+function unwrapGift(){
+  const box = document.getElementById('giftBox');
+  if(box.classList.contains('opening')) return;
+  box.classList.add('opening');
+  document.getElementById('giftInstruction').textContent = '✨ Unwrapping your surprise...';
+  burstHearts(26);
+  setTimeout(()=>{
+    box.style.display = 'none';
+    document.getElementById('videoWrap').style.display = 'block';
+    document.getElementById('giftInstruction').textContent = '💖 Surprise! Tap play below.';
+    const vid = document.getElementById('giftVideo');
+    if(vid){ vid.play().catch(()=>{}); }
+  }, 650);
 }
 
 /* ---------------- Letter-finding intro game ---------------- */
