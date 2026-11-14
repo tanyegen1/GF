@@ -47,3 +47,9 @@ link:
    `main` once merged) and folder `/ (root)`, then **Save**.
 4. After a minute, your link will be live at the URL GitHub shows on that
    page.
+
+---
+
+## Payımız (ayrı proje)
+
+Bu depoda ayrıca [`payimiz/`](payimiz/README.md) klasöründe, yukarıdaki siteden bağımsız bir ortak harcama uygulaması bulunur.
